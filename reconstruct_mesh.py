@@ -113,7 +113,7 @@ def Projection_layer(face_shape,rotation,translation,focal=1015.0,center=112.0):
 	face_projection = aug_projection[:,:,0:2]/np.reshape(aug_projection[:,:,2],[1,np.shape(aug_projection)[1],1])
 	z_buffer = np.reshape(aug_projection[:,:,2],[1,-1,1])
 
-	return face_projection,z_buffer
+	return face_projection,z_buffer,p_matrix
 
 # compute vertex color using face_texture and SH function lighting approximation
 # input: face_texture with shape [1,N,3]
@@ -175,7 +175,7 @@ def Reconstruction(coeff,facemodel):
 	face_norm_r = np.matmul(face_norm,rotation)
 
 	# compute vertex projection on image plane (with image sized 224*224)
-	face_projection,z_buffer = Projection_layer(face_shape,rotation,translation)
+	face_projection,z_buffer,projection_mat = Projection_layer(face_shape,rotation,translation)
 	face_projection = np.stack([face_projection[:,:,0],224 - face_projection[:,:,1]], axis = 2)
 
 	# compute 68 landmark on image plane
@@ -187,7 +187,7 @@ def Reconstruction(coeff,facemodel):
 	# vertex index for each face of BFM model
 	tri = facemodel.tri
 
-	return face_shape,face_texture,face_color,tri,face_projection,z_buffer,landmarks_2d
+	return face_shape,face_texture,face_color,tri,face_projection,z_buffer,landmarks_2d, translation.squeeze(), rotation.squeeze(), projection_mat.squeeze()
 
 # def Reconstruction_for_render(coeff,facemodel):
 # 	id_coeff,ex_coeff,tex_coeff,angles,gamma,translation = Split_coeff(coeff)
